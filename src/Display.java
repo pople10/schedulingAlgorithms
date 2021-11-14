@@ -48,6 +48,7 @@ import factory.MethodFactoryBuilder;
 import utility.DataType;
 import utility.Helper;
 import utility.Methods;
+import utility.Statistic;
 import utility.Validator;
 
 
@@ -60,7 +61,7 @@ public class Display extends JFrame {
 	
 	public void showErrorMessage(String msg)
 	{
-		JOptionPane.showMessageDialog(null, msg, "Erreur", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
 	public void showSuccessMessage(String msg)
@@ -73,13 +74,13 @@ public class Display extends JFrame {
 		}
 		Image image = img.getScaledInstance((int)30, (int)30, Image.SCALE_SMOOTH);
 		ImageIcon icon = new ImageIcon(image);
-		JOptionPane.showMessageDialog(null, msg, "Succès", JOptionPane.INFORMATION_MESSAGE, 
+		JOptionPane.showMessageDialog(null, msg, "Success", JOptionPane.INFORMATION_MESSAGE, 
 				icon);
 	}
 	
 	public void showWarningMessage(String msg)
 	{
-		JOptionPane.showMessageDialog(null, msg, "Avertissement", JOptionPane.WARNING_MESSAGE);
+		JOptionPane.showMessageDialog(null, msg, "Warning", JOptionPane.WARNING_MESSAGE);
 	}
 	
 	public void showSplashScreen()
@@ -168,6 +169,7 @@ public class Display extends JFrame {
 					}
                 } else {
                 		showWarningMessage("You have to select a file");
+                		chosen.setText("No file chosen");
                 		input=null;
                 }
             }
@@ -217,7 +219,7 @@ public class Display extends JFrame {
             		showErrorMessage("Invalid method");
             		return;
             	}
-        		window.setVisible(false);
+        		//window.setVisible(false);
         		JWindow loader = new JWindow();
         		loader.getContentPane().add(
         			    new JLabel(new ImageIcon("images/wait.png")), SwingConstants.CENTER);
@@ -234,9 +236,11 @@ public class Display extends JFrame {
         		methodSolving.solve();
         		loader.setVisible(false);
         		Map<String, Integer[]> result = methodSolving.getSolution();
+        		List<Statistic> stat = Helper.getStatisticsFromResult(result, input);
         		if(methodSolving.isSolutionFound())
         		{
         			show(result,methodLabelSelectedTmp,methodSolving.getMax());
+        			showStatistic(stat);
         			if(methodSolving.isSolutionFound())
             			showSuccessMessage("La solution a été trouvé\nTrouvé dans "+
             		Helper.secondsToString(((float)methodSolving.getDuration()/1000)));
@@ -280,11 +284,61 @@ public class Display extends JFrame {
 		this.removeAll();
 	}
 	
+	public void showStatistic(List<Statistic> list)
+	{
+		int n = list.size();
+		JFrame sFrame = new JFrame("Statistics");
+		sFrame.setLayout(new GridLayout(n+2,4));
+		JLabel empty = new JLabel();
+		sFrame.add(empty);
+		JLabel rotationLabel = new JLabel("Rotation",SwingConstants.CENTER);
+		sFrame.add(rotationLabel);
+		JLabel waitingLabel = new JLabel("Waiting Time",SwingConstants.CENTER);
+		sFrame.add(waitingLabel);
+		JLabel rendementLabel = new JLabel("Rendement",SwingConstants.CENTER);
+		sFrame.add(rendementLabel);
+		int cmp=0;
+		float sumR=0;
+		float sumW=0;
+		float sumRe=0;
+		for(Statistic i : list)
+		{
+			JLabel tmp = new JLabel(i.getName(),SwingConstants.CENTER);
+			JLabel tmp1 = new JLabel(""+i.getRotation(),SwingConstants.CENTER);
+			JLabel tmp2 = new JLabel(""+i.getWaiting(),SwingConstants.CENTER);
+			JLabel tmp3 = new JLabel(""+i.getRendement(),SwingConstants.CENTER);
+			sFrame.add(tmp);
+			sFrame.add(tmp1);
+			sFrame.add(tmp2);
+			sFrame.add(tmp3);
+			sumR+=i.getRotation();
+			sumW+=i.getWaiting();
+			sumRe+=i.getRendement();
+			cmp++;
+		}
+
+		JLabel tmp = new JLabel("Average",SwingConstants.CENTER);
+		JLabel tmp1 = new JLabel(""+((float)(sumR/cmp)),SwingConstants.CENTER);
+		JLabel tmp2 = new JLabel(""+((float)(sumW/cmp)),SwingConstants.CENTER);
+		JLabel tmp3 = new JLabel(""+((float)(sumRe/cmp)),SwingConstants.CENTER);
+		sFrame.add(tmp);
+		sFrame.add(tmp1);
+		sFrame.add(tmp2);
+		sFrame.add(tmp3);
+		sFrame.pack();
+		sFrame.setIconImage((new ImageIcon("images/logo.png")).getImage());
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (int) ((dimension.getWidth() - sFrame.getWidth()) / 2);
+	    int y = (int) ((dimension.getHeight() - sFrame.getHeight()) / 2);
+	    sFrame.setLocation(x, y);
+		sFrame.setVisible(true);
+	}
+	
 	public void show(Map<String, Integer[]> data,String method,int n)
 	{
+		this.getContentPane().removeAll();
 		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setSize((int) dimension.getWidth(),600);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    int x = (int) ((dimension.getWidth() - this.getWidth()) / 2);
 	    int y = (int) ((dimension.getHeight() - this.getHeight()) / 2);
 	    this.setLocation(x,y);

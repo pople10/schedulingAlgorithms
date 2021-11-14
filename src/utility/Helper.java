@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import exceptions.InvalidDataException;
 
@@ -325,5 +326,40 @@ public class Helper {
 		   names.add(comps[0]);
 		}
 		return res;
+	}
+	
+	public static List<Statistic> getStatisticsFromResult(Map<String, Integer[]> data,List<DataType> input)
+	{
+		List<Statistic> res = new ArrayList<Statistic>();
+		for(Entry<String, Integer[]> i : data.entrySet())
+		{
+			int max = 0;
+			for(Integer j : i.getValue())
+			{
+				if(j>max)
+					max=j;
+			}
+			Statistic tmp = new Statistic();
+			String name = i.getKey();
+			tmp.setName(name);
+			DataType datos = findDataTypeFromList(input,name);
+			tmp.setRotation(max-datos.getArriving());
+			tmp.setWaiting(tmp.getRotation()-datos.getTime());
+			tmp.setRendement(1f-((float)tmp.getWaiting()/tmp.getRotation()));
+			res.add(tmp);
+		}
+		return res;
+	}
+	
+	public static DataType findDataTypeFromList(List<DataType> data,String name)
+	{
+		if(data==null)
+			return null;
+		for(DataType i : data)
+		{
+			if(i.getName().equals(name))
+				return i;
+		}
+		return null;
 	}
 }
