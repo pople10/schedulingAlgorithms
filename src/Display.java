@@ -317,9 +317,7 @@ public class Display extends JFrame {
 			JLabel empty = new JLabel();
 			this.add(empty);
 		}
-		JLabel empty = new JLabel("0",SwingConstants.RIGHT);
-		this.add(empty);
-		for(Integer i=1;i<=n;i++)
+		for(Integer i=0;i<=n;i++)
 		{
 			JLabel names = new JLabel(i.toString(),SwingConstants.RIGHT);
 			this.add(names);
