@@ -294,6 +294,7 @@ public class Helper {
 		if(!f.getName().split("\\.")[1].equals("csv"))
 			throw new InvalidDataException("You must choose a csv file");
 		List<DataType> res = new ArrayList<DataType>();
+		List<String> names = new ArrayList<String>();
 		BufferedReader br = new BufferedReader(new FileReader(f));
         String line = "";
         boolean flag=!isSelected;
@@ -304,6 +305,10 @@ public class Helper {
 			   continue;
 		   }
 		   String[] comps = line.split(";");
+		   if(names.contains(comps[0]))
+		   {
+			   throw new InvalidDataException("Duplicate task name");
+		   }
 		   if(comps.length!=3)
 		   {
 			   throw new InvalidDataException("Few or too much argument for one line");
@@ -317,6 +322,7 @@ public class Helper {
 		   tmp.setArriving(Integer.parseInt(comps[1]));
 		   tmp.setTime(Integer.parseInt(comps[2]));
 		   res.add(tmp);
+		   names.add(comps[0]);
 		}
 		return res;
 	}
