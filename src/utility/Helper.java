@@ -289,12 +289,14 @@ public class Helper {
 		return false;
 	}
 	
-	public static List<DataType> readDataFromFile(File f) throws IOException,InvalidDataException
+	public static List<DataType> readDataFromFile(File f,boolean isSelected) throws IOException,InvalidDataException
 	{
+		if(!f.getName().split("\\.")[1].equals("csv"))
+			throw new InvalidDataException("You must choose a csv file");
 		List<DataType> res = new ArrayList<DataType>();
 		BufferedReader br = new BufferedReader(new FileReader(f));
         String line = "";
-        boolean flag=false;
+        boolean flag=!isSelected;
 		while ((line = br.readLine()) != null) {
 		   if(!flag)
 		   {

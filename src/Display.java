@@ -30,6 +30,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -39,6 +40,7 @@ import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import algorithms.InterfaceAlgorithm;
 import exceptions.InvalidDataException;
@@ -54,7 +56,7 @@ public class Display extends JFrame {
 	public static HashMap<Methods,String> methodLabels = new HashMap<Methods,String>();
 	public static HashMap<String,Methods> methodLabelsRev = new HashMap<String,Methods>();
 	public Methods selectedMethod = null;
-	List<DataType> input = new ArrayList<DataType>();
+	List<DataType> input = null;
 	
 	public void showErrorMessage(String msg)
 	{
@@ -105,7 +107,14 @@ public class Display extends JFrame {
 	{
 		JFrame window = new JFrame("Beginning");
 		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(new File  
+				(System.getProperty("user.home")+"\\Desktop"));
+		fileChooser.setFileFilter(new FileNameExtensionFilter("*.csv", "csv"));
 		JButton choosing = new JButton("Select a csv file");
+		JLabel chosen = new JLabel();
+		chosen.setHorizontalAlignment(SwingConstants.CENTER);
+		chosen.setText("No file chosen");
+		JCheckBox header = new JCheckBox("Is there any header?",true);
 		window.setIconImage((new ImageIcon("images/logo.png")).getImage());
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setLayout(new GridBagLayout());
@@ -114,7 +123,7 @@ public class Display extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(3,3,3,3);
         JComboBox<String> comboBox = new JComboBox<String>();
-		comboBox.addItem("First Come Firt Server");
+		comboBox.addItem("First Come First Served");
 		comboBox.addItem("Round Robin");
 		comboBox.addItem("SJF without preemption");
 		comboBox.addItem("SJF with preemption");
@@ -142,16 +151,19 @@ public class Display extends JFrame {
 		choosing.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	int returnVal = fileChooser.showOpenDialog(Display.this);
-
+   
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
                     try {
-						input = Helper.readDataFromFile(file);
+						input = Helper.readDataFromFile(file,header.isSelected());
+						chosen.setText(file.getName());
 					} catch (IOException e1) {
 						showErrorMessage("Something went wrong with the file");
+						chosen.setText("No file chosen");
 						input=null;
 					} catch (InvalidDataException e1) {
 						showErrorMessage(e1.toString());
+						chosen.setText("No file chosen");
 						input=null;
 					}
                 } else {
@@ -193,12 +205,12 @@ public class Display extends JFrame {
         		if(method==Methods.RR)
         		{
 	            	String num = number.getText();
-            		qtm=Integer.parseInt(num);
 	            	if(!Validator.isInteger(num))
 	            	{
 	            		showErrorMessage("Invalid number");
 	            		return;
 	            	}
+            		qtm=Integer.parseInt(num);
         		}
             	if(method==null)
             	{
@@ -245,6 +257,8 @@ public class Display extends JFrame {
 		window.getContentPane().add(infoNumber, gbc);
 		window.getContentPane().add(number, gbc);
 		window.getContentPane().add(choosing, gbc);
+		window.getContentPane().add(chosen, gbc);
+		window.getContentPane().add(header, gbc);
 		window.getContentPane().add(button, gbc);
 		window.pack();
 		window.setLocationRelativeTo(null);
@@ -303,7 +317,7 @@ public class Display extends JFrame {
 			JLabel empty = new JLabel();
 			this.add(empty);
 		}
-		JLabel empty = new JLabel();
+		JLabel empty = new JLabel("0",SwingConstants.RIGHT);
 		this.add(empty);
 		for(Integer i=1;i<=n;i++)
 		{
@@ -319,12 +333,12 @@ public class Display extends JFrame {
 	
 	public Display()
 	{
-		Display.methodLabels.put(Methods.FIFO, "First Come Firt Server");
+		Display.methodLabels.put(Methods.FIFO, "First Come First Served");
 		Display.methodLabels.put(Methods.RR, "Round Robin");
 		Display.methodLabels.put(Methods.SJF_NOP, "SJF without preemption");
 		Display.methodLabels.put(Methods.SJF_P, "SJF with preemption");
 		Display.methodLabels.put(Methods.SRT, "Shortest Remaining Task");
-		Display.methodLabelsRev.put("First Come Firt Server",Methods.FIFO);
+		Display.methodLabelsRev.put("First Come First Served",Methods.FIFO);
 		Display.methodLabelsRev.put("Round Robin",Methods.RR);
 		Display.methodLabelsRev.put("SJF without preemption",Methods.SJF_NOP);
 		Display.methodLabelsRev.put("SJF with preemption",Methods.SJF_P);
